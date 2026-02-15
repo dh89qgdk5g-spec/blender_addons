@@ -1,3 +1,15 @@
+bl_info = {
+    "name": "Analizador de Curvatura de Normales",
+    "author": "Tu Nombre",
+    "version": (1, 0),
+    "blender": (3, 6, 0),
+    "location": "View3D > Sidebar > Curvatura",
+    "description": "Calcula y visualiza la curvatura basada en normales",
+    "warning": "",
+    "doc_url": "",
+    "category": "Mesh",
+}
+
 import bpy
 import bmesh
 from mathutils import Vector
