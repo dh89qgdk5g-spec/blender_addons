@@ -1,8 +1,8 @@
 bl_info = {
-    "name": "Analizador de Curvatura de Normales",
-    "author": "Tu Nombre",
-    "version": (1, 0),
-    "blender": (3, 6, 0),
+    "name": "Normal curvature heatmap generator",
+    "author": "jojen",
+    "version": (1, 1),
+    "blender": (4, 0, 2),
     "location": "View3D > Sidebar > Curvatura",
     "description": "Calcula y visualiza la curvatura basada en normales",
     "warning": "",
