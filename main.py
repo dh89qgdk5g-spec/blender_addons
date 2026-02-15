@@ -1,12 +1,12 @@
 bl_info = {
-    "name": "Normal curvature heatmap generator",
+    "name": "Normal Curvature Heatmap Generator",
     "author": "jojen",
     "version": (1, 1),
     "blender": (4, 0, 2),
-    "location": "View3D > Sidebar > Curvatura",
-    "description": "Calcula y visualiza la curvatura basada en normales",
+    "location": "View3D > Sidebar > Curvature",
+    "description": "Calculates and visualizes curvature based on normals",
     "warning": "",
-    "doc_url": "",
+    "doc_url": "https://github.com/dh89qgdk5g-spec/normal_curvature_map",
     "category": "Mesh",
 }
 
@@ -39,7 +39,7 @@ def generate_color_icons():
     scale = scene.curvature_scale
     power = scene.curvature_power
 
-    # Weight Paint ramp exacto
+    # Exact Weight Paint ramp
     stops = [
         (0.0,  (0.0, 0.0, 1.0)),
         (0.25, (0.0, 1.0, 1.0)),
@@ -65,7 +65,7 @@ def generate_color_icons():
 
     for i, factor in enumerate(values):
 
-        # 🔹 Aplicar MISMA transformación que el heatmap
+        # 🔹 Apply SAME transformation as the heatmap
         scaled = min(1.0, factor * scale)
         scaled = pow(scaled, power)
         scaled = max(0.0, min(1.0, scaled))
@@ -85,20 +85,20 @@ def generate_color_icons():
         pcoll.load(f"curv_icon_{i}", temp_path, 'IMAGE')
 
 # ------------------------------------------------------------
-# Operador calcular curvatura
+# Curvature calculation operator
 # ------------------------------------------------------------
 
 class MESH_OT_calculate_curvature(bpy.types.Operator):
-    """Calcula la curvatura visual basada en diferencias angulares de normales"""
+    """Calculates visual curvature based on angular differences of normals"""
     bl_idname = "mesh.calculate_curvature"
-    bl_label = "Calcular Curvatura"
+    bl_label = "Calculate Curvature"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
         obj = context.active_object
         
         if obj is None or obj.type != 'MESH':
-            self.report({'ERROR'}, "Selecciona una malla válida")
+            self.report({'ERROR'}, "Select a valid mesh")
             return {'CANCELLED'}
         
         scale = context.scene.curvature_scale
@@ -163,20 +163,20 @@ class MESH_OT_calculate_curvature(bpy.types.Operator):
         
         obj.vertex_groups.active = vg
 
-        # Generar iconos dinámicos
+        # Generate dynamic icons
         generate_color_icons()
         
-        self.report({'INFO'}, f"Curvatura calculada para {len(curvatures)} vértices")
+        self.report({'INFO'}, f"Successfully created curvature heatmap for {len(curvatures)} vertices")
         return {'FINISHED'}
 
 
 # ------------------------------------------------------------
-# Limpiar curvatura
+# Clear curvature
 # ------------------------------------------------------------
 
 class MESH_OT_clear_curvature(bpy.types.Operator):
     bl_idname = "mesh.clear_curvature"
-    bl_label = "Limpiar Curvatura"
+    bl_label = "Clear Heatmap"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -187,19 +187,21 @@ class MESH_OT_clear_curvature(bpy.types.Operator):
             context.scene.curvature_min = 0.0
             context.scene.curvature_max = 0.0
         
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
         return {'FINISHED'}
 
 
 # ------------------------------------------------------------
-# Panel escala de colores
+# Color scale panel
 # ------------------------------------------------------------
 
 class VIEW3D_PT_curvature_colorbar(bpy.types.Panel):
-    bl_label = "Escala de curvatura"
+    bl_label = "Curvature Scale"
     bl_idname = "VIEW3D_PT_curvature_colorbar"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Curvatura'
+    bl_category = 'Curvature'
     bl_parent_id = "VIEW3D_PT_curvature_analyzer"
     
     def draw(self, context):
@@ -208,7 +210,7 @@ class VIEW3D_PT_curvature_colorbar(bpy.types.Panel):
         obj = context.active_object
         
         if not (obj and obj.type == 'MESH' and "Curvature" in obj.vertex_groups):
-            layout.label(text="Calcula la curvatura primero", icon='INFO')
+            layout.label(text="Calculate curvature first", icon='INFO')
             return
         
         min_val = scene.curvature_min
@@ -242,15 +244,15 @@ class VIEW3D_PT_curvature_colorbar(bpy.types.Panel):
 
 
 # ------------------------------------------------------------
-# Panel principal
+# Main panel
 # ------------------------------------------------------------
 
 class VIEW3D_PT_curvature_analyzer(bpy.types.Panel):
-    bl_label = "Curvatura de Normales"
+    bl_label = "Normal Curvature"
     bl_idname = "VIEW3D_PT_curvature_analyzer"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Curvatura'
+    bl_category = 'Curvature'
     
     def draw(self, context):
         layout = self.layout
@@ -259,10 +261,10 @@ class VIEW3D_PT_curvature_analyzer(bpy.types.Panel):
         
         box = layout.box()
         if obj and obj.type == 'MESH':
-            box.label(text=f"Malla: {obj.name}", icon='MESH_DATA')
-            box.label(text=f"Vértices: {len(obj.data.vertices)}")
+            box.label(text=f"Mesh: {obj.name}", icon='MESH_DATA')
+            box.label(text=f"Vertices: {len(obj.data.vertices)}")
         else:
-            box.label(text="Selecciona una malla", icon='ERROR')
+            box.label(text="Select a mesh", icon='ERROR')
         
         layout.separator()
         
@@ -274,7 +276,7 @@ class VIEW3D_PT_curvature_analyzer(bpy.types.Panel):
         layout.separator()
         
         box = layout.box()
-        box.label(text="Ajustes de Visualización", icon='PREFERENCES')
+        box.label(text="Visualization Settings", icon='PREFERENCES')
         
         col = box.column(align=True)
         col.prop(scene, "curvature_scale", slider=True)
@@ -282,22 +284,22 @@ class VIEW3D_PT_curvature_analyzer(bpy.types.Panel):
 
 
 # ------------------------------------------------------------
-# Propiedades
+# Properties
 # ------------------------------------------------------------
 
 def register_properties():
     bpy.types.Scene.curvature_scale = bpy.props.FloatProperty(
-        name="Escala",
+        name="Scale",
         default=1.0,
-        min=0.1,
+        min=0,
         max=10.0
     )
     
     bpy.types.Scene.curvature_power = bpy.props.FloatProperty(
-        name="Contraste",
+        name="Contrast",
         default=1.0,
-        min=0.1,
-        max=5.0
+        min=0,
+        max=10.0
     )
     
     bpy.types.Scene.curvature_min = bpy.props.FloatProperty(default=0.0)
